@@ -151,3 +151,8 @@
     width: 100%;
   }
 }
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}

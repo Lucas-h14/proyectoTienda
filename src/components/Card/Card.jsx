@@ -37,7 +37,7 @@ const products = [
   },
     {
     id: 5,
-    image: "/images/raqueta.jpg",
+    image: "/images/guantes.jpg",
     name: "guantes de boxeo",
     price: 10.99,
     oldPrice: 50.99,

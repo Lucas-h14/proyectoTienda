@@ -6,10 +6,44 @@ function Contacto() {
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
+    telefono: '',
+    asunto: '',
     mensaje: ''
   });
 
+  const [errors, setErrors] = useState({});
   const [submitStatus, setSubmitStatus] = useState(null);
+
+  const validate = (name, value) => {
+    let error = '';
+
+    switch (name) {
+      case 'nombre':
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
+          error = 'El nombre solo debe contener letras.';
+        }
+        break;
+      case 'email':
+        if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+          error = 'Email inválido.';
+        }
+        break;
+      case 'telefono':
+        if (!/^\d+$/.test(value)) {
+          error = 'El teléfono solo debe contener números.';
+        }
+        break;
+      case 'mensaje':
+        if (value.trim().length < 10) {
+          error = 'El mensaje debe tener al menos 10 caracteres.';
+        }
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,14 +51,29 @@ function Contacto() {
       ...prev,
       [name]: value
     }));
+    validate(name, value);
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.nombre &&
+      formData.email &&
+      formData.telefono &&
+      formData.asunto &&
+      formData.mensaje &&
+      Object.values(errors).every((error) => !error)
+    );
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar el formulario
+    if (!isFormValid()) {
+      return;
+    }
+
     console.log('Formulario enviado:', formData);
     setSubmitStatus('success');
-    setFormData({ nombre: '', email: '', mensaje: '' });
+    setFormData({ nombre: '', email: '', telefono: '', asunto: '', mensaje: '' });
     setTimeout(() => setSubmitStatus(null), 3000);
   };
 
@@ -62,44 +111,34 @@ function Contacto() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.contactoForm}>
-          <div className={styles.formGroup}>
-            <label htmlFor="nombre">Nombre</label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className={styles.contactoForm} noValidate>
+          {['nombre', 'email', 'telefono', 'asunto', 'mensaje'].map((field) => (
+            <div key={field} className={styles.formGroup}>
+              <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+              {field === 'mensaje' ? (
+                <textarea
+                  id={field}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  rows="5"
+                  required
+                />
+              ) : (
+                <input
+                  type={field === 'email' ? 'email' : 'text'}
+                  id={field}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  required
+                />
+              )}
+              {errors[field] && <p className={styles.error}>{errors[field]}</p>}
+            </div>
+          ))}
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="mensaje">Mensaje</label>
-            <textarea
-              id="mensaje"
-              name="mensaje"
-              value={formData.mensaje}
-              onChange={handleChange}
-              rows="5"
-              required
-            ></textarea>
-          </div>
-
-          <button type="submit" className={styles.submitButton}>
+          <button type="submit" className={styles.submitButton} disabled={!isFormValid()}>
             <FaPaperPlane /> Enviar Mensaje
           </button>
 
